@@ -1,0 +1,114 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3.11
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        args: ['--max-line-length=100', '--ignore=E203,W503']
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: medstream-postgres
+    environment:
+      POSTGRES_DB: medstream
+      POSTGRES_USER: dataeng
+      POSTGRES_PASSWORD: dev_password_change_in_prod
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataeng"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  mongodb:
+    image: mongo:7
+    container_name: medstream-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dataeng
+      MONGO_INITDB_ROOT_PASSWORD: dev_password_change_in_prod
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+  minio:
+    image: minio/minio:latest
+    container_name: medstream-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  spark-master:
+    image: bitnami/spark:3.5.0
+    container_name: medstream-spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ./spark_jobs:/opt/spark-jobs
+      - ./config:/opt/config
+  spark-worker:
+    image: bitnami/spark:3.5.0
+    container_name: medstream-spark-worker
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=2
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark_jobs:/opt/spark-jobs
+  dagster:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medstream-dagster
+    environment:
+      DAGSTER_POSTGRES_HOST: postgres
+      DAGSTER_POSTGRES_DB: medstream
+      DAGSTER_POSTGRES_USER: dataeng

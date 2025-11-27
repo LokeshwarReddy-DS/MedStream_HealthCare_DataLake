@@ -1,0 +1,75 @@
+from setuptools import setup, find_packages
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+setup(
+    name="medstream-healthcare-datalake",
+    version="1.0.0",
+    author="Lokeshwar Reddy DS",
+    author_email="lokeshwar.reddy.ds@example.com",
+    description="HIPAA-compliant healthcare data lake platform",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/LokeshwarReddy-DS/medstream-healthcare-datalake",
+    packages=find_packages(exclude=["tests", "docs"]),
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Healthcare Industry",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.11",
+    ],
+    python_requires=">=3.11",
+    install_requires=[
+        line.strip()
+        for line in open("requirements.txt").readlines()
+        if not line.startswith("#") and line.strip()
+    ],
+    extras_require={
+        "dev": [
+            line.strip()
+            for line in open("requirements-dev.txt").readlines()
+            if not line.startswith("#") and line.strip()
+        ],
+    },
+)
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+# Virtual Environment
+venv/
+ENV/
+env/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+# Jupyter Notebook
+.ipynb_checkpoints
+# Environment variables
+.env
+.env.local
+.env.*.local
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,31 @@
+.tox/
+# Data files
+data/raw/*
+data/bronze/*
+data/silver/*
+data/gold/*
+*.csv
+*.parquet
+*.json
+!data/.gitkeep
+# Logs
+*.log
+logs/
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+# Docker
+docker-compose.override.yml
+# Delta Lake
+_delta_log/
+_spark_metadata/
+# OS
+.DS_Store
+Thumbs.db
+# Secrets
+secrets/
+*.pem
+*.key
+yaml
