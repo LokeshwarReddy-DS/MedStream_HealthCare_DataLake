@@ -18,7 +18,7 @@ MedStream is an **enterprise-grade healthcare data lake** designed for **HIPAA-c
 ---
 
 ## 🏗 Architecture  
-![Architecture Diagram](architecture.png) *(Add diagram here)*  
+![Architecture Diagram](architecture.png) 
 
 ---
 
